@@ -1,0 +1,33 @@
+name: Maven Publish
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  Publish:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Publish
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: publishRelease
+        env:
+          RELEASE_NAME: ${{ env.release.name }}
+          CHANGELOG: ${{ env.release.description }}
+          BETA: ${{ env.release.prerelease }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}

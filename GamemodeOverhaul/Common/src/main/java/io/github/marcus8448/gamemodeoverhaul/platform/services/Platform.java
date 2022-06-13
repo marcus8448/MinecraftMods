@@ -1,0 +1,23 @@
+/*
+ * GamemodeOverhaul Copyright (C) 2019-2022 marcus8448
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/.
+ */
+
+package io.github.marcus8448.gamemodeoverhaul.platform.services;
+
+import io.github.marcus8448.gamemodeoverhaul.GamemodeOverhaulConfig;
+
+public interface Platform {
+    GamemodeOverhaulConfig createConfig();
+}
