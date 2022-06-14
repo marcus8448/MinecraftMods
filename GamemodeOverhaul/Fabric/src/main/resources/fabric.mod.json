@@ -11,8 +11,6 @@
     "homepage": "https://github.com/marcus8448/MinecraftMods",
     "sources": "https://github.com/marcus8448/MinecraftMods"
   },
-  "license": "LGPL-3.0",
-  "icon": "${mod_id}.png",
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -21,7 +19,7 @@
   },
   "depends": {
     "fabricloader": ">=0.14",
-    "minecraft": ">=1.18",
+    "minecraft": ">=${mc_major_minor}",
     "java": ">=17"
   }
 }

@@ -88,16 +88,19 @@ buildscript {
 }
 
 subprojects ModProject@ {
-    val modName = project.property("mod_name").toString()
-    val modId = project.property("mod_id").toString()
-    val modAuthor = project.property("mod_author").toString()
-    val modVersion = project.property("mod_version").toString()
     val minecraftVersion = project.property("minecraft.version").toString()
+    val minecraftVersionMajorMinor = minecraftVersion.split(".")[0] + "." + minecraftVersion.split(".")[1]
     val fabricLoader = project.property("fabric.loader").toString()
     val fabricApi = project.property("fabric.api").toString()
     val forgeVersion = project.property("forge").toString()
 
-    version = modVersion
+    val modName = project.property("mod_name").toString()
+    val modId = project.property("mod_id").toString()
+    val modAuthor = project.property("mod_author").toString()
+    val modVersion = project.property("mod_version").toString()
+    val decoratedModVersion = "${modVersion}+${minecraftVersion}"
+
+    version = decoratedModVersion
     group = project.property("mod_group").toString()
 
     subprojects SubProject@ {
@@ -105,11 +108,11 @@ subprojects ModProject@ {
         apply(plugin = "maven-publish")
         apply(plugin = "org.cadixdev.licenser")
 
-        version = modVersion
+        version = decoratedModVersion
         group = project.property("mod_group").toString()
 
         configure<BasePluginExtension> {
-            archivesName.set("${modName}-${name.toLowerCase()}-${minecraftVersion}")
+            archivesName.set("${modName}-${name.toLowerCase()}")
         }
 
         configure<org.cadixdev.gradle.licenser.LicenseExtension> {
@@ -217,13 +220,16 @@ subprojects ModProject@ {
                 }
             }
             "Fabric" -> {
-
                 apply(plugin = "fabric-loom")
                 apply(plugin = "idea")
 
                 val fabricModules = project.property("fabric.api.modules").toString().split(",".toRegex())
 
                 configure<net.fabricmc.loom.api.LoomGradleExtensionAPI> {
+                    if (project.file("src/main/resources/${modId}.accesswidener").exists()) {
+                        accessWidenerPath.set(project.file("src/main/resources/${modId}.accesswidener"))
+                    }
+
                     runs {
                         getByName("client") {
                             client()
@@ -261,7 +267,7 @@ subprojects ModProject@ {
                                         )
                                     }"
                                 ) {
-                                    isTransitive = true;
+                                    isTransitive = true
                                     exclude(module = "fabric-loader")
                                 }
                             }
@@ -272,22 +278,50 @@ subprojects ModProject@ {
                 tasks.withType(ProcessResources::class) {
                     from(commonMainSourceSet.resources)
                     filesMatching("fabric.mod.json") {
-                        expand(this@ModProject.properties)
+                        val map = HashMap(this@ModProject.properties)
+                        map["mc_major_minor"] = minecraftVersionMajorMinor
+                        expand(map)
                     }
+
                     doLast {
-                        val file = outputs.files.singleFile.resolve("fabric.mod.json")
-                        if (file.exists()) {
-                            val json = groovy.json.JsonSlurper().parse(file) as java.util.Map<String, Any>
-                            val depends = json["depends"] as java.util.Map<String, Any>
-                            if (fabricModules.isEmpty() || fabricModules[0] == "*") {
-                                depends.put("fabric", "*");
-                            } else if (fabricModules.isNotEmpty() && fabricModules[0].isNotBlank()) {
-                                fabricModules.forEach { depends.put(it, "*") }
+                        val modJson = outputs.files.singleFile.resolve("fabric.mod.json")
+                        if (modJson.exists()) {
+                            val json = groovy.json.JsonSlurper().parse(modJson) as MutableMap<String, Any>
+                            run {
+                                var file1: File
+                                if (!json.containsKey("mixins")) {
+                                    val mixins = ArrayList<String>()
+                                    file1 = modJson.resolveSibling("${modId}.mixins.json");
+                                    if (file1.exists()) mixins.add(file1.name)
+                                    file1 = modJson.resolveSibling("${modId}.client.mixins.json");
+                                    if (file1.exists()) mixins.add(file1.name)
+                                    file1 = modJson.resolveSibling("${modId}.server.mixins.json");
+                                    if (file1.exists()) mixins.add(file1.name)
+                                    json["mixins"] = mixins
+                                }
+                                if (!json.containsKey("accessWidener")) {
+                                    file1 = modJson.resolveSibling("${modId}.accesswidener")
+                                    if (file1.exists()) json["accessWidener"] = file1.name
+                                }
+
+                                if (!json.containsKey("icon")) {
+                                    file1 = modJson.resolveSibling("${modId}.png")
+                                    if (file1.exists()) json["icon"] = file1.name
+                                }
+
+                                if (!json.containsKey("license")) json["license"] = "LGPL-3.0-only"
+
+                                val depends = json["depends"] as MutableMap<String, Any>
+                                if (fabricModules.isEmpty() || fabricModules[0] == "*") {
+                                    depends["fabric"] = "*"
+                                } else if (fabricModules.isNotEmpty() && fabricModules[0].isNotBlank()) {
+                                    fabricModules.forEach { depends[it] = "*" }
+                                }
                             }
-                            file.writeText(groovy.json.JsonOutput.toJson(json))
+                            modJson.writeText(groovy.json.JsonOutput.toJson(json))
                         }
                         fileTree(mapOf("dir" to outputs.files.asPath, "includes" to listOf("**/*.json", "**/*.mcmeta"))).forEach {
-                                file: File -> file.writeText(groovy.json.JsonOutput.toJson(groovy.json.JsonSlurper().parse(file)))
+                                file1: File -> file1.writeText(groovy.json.JsonOutput.toJson(groovy.json.JsonSlurper().parse(file1)))
                         }
                     }
                 }
@@ -328,8 +362,8 @@ subprojects ModProject@ {
                                     if (this@SubProject.name == "Fabric") {
                                         token.set(System.getenv("MODRINTH_TOKEN"))
                                         projectId.set(modrinthId)
-                                        versionNumber.set(this@ModProject.version.toString() + "-fabric")
-                                        versionName.set("${modName} v${this@ModProject.version} (Fabric)")
+                                        versionNumber.set("${decoratedModVersion}-fabric")
+                                        versionName.set("$modName v${this@ModProject.version} (Fabric)")
                                         if (System.getenv().containsKey("BETA") && System.getenv("BETA").toBoolean()) {
                                             versionType.set("beta")
                                         } else {
@@ -363,10 +397,10 @@ subprojects ModProject@ {
                     tasks.create("publishCurseforge", net.darkhax.curseforgegradle.TaskPublishCurseForge::class) {
                         apiToken = System.getenv("CURSEFORGE_TOKEN").toString()
                         val mainFile = upload(curseforgeId, tasks.getByName("remapJar"))
-                        mainFile.gameVersions.add("fabric")
-                        mainFile.gameVersions.add(minecraftVersion)
-                        mainFile.gameVersions.add("Java 17")
-                        mainFile.displayName = "${modName} ${modVersion} (Fabric ${minecraftVersion})"
+                        mainFile.addGameVersion("fabric")
+                        mainFile.addGameVersion(minecraftVersion)
+                        mainFile.addJavaVersion("Java 17")
+                        mainFile.displayName = "$modName $modVersion (Fabric ${minecraftVersion})"
                         if (System.getenv().containsKey("BETA") && System.getenv("BETA").toBoolean()) {
                             mainFile.releaseType = "beta"
                         } else {
@@ -448,7 +482,10 @@ subprojects ModProject@ {
                 tasks.withType(ProcessResources::class) {
                     from(commonMainSourceSet.resources)
                     filesMatching("META-INF/mods.toml") {
-                        expand(this@ModProject.properties)
+                        val map = HashMap(this@ModProject.properties);
+                        map["forge_major"] = forgeVersion.split(".")[0];
+                        map["mc_major_minor"] = minecraftVersionMajorMinor;
+                        expand(map)
                     }
                 }
 
@@ -485,8 +522,8 @@ subprojects ModProject@ {
                                 configure<com.modrinth.minotaur.ModrinthExtension> {
                                     token.set(System.getenv("MODRINTH_TOKEN"))
                                     projectId.set(modrinthId)
-                                    versionNumber.set(this@ModProject.version.toString() + "+forge")
-                                    versionName.set("${modName} v${this@ModProject.version} (Forge)")
+                                    versionNumber.set("{$decoratedModVersion}-forge")
+                                    versionName.set("$modName v${this@ModProject.version} (Forge)")
                                     if (System.getenv().containsKey("BETA") && System.getenv("BETA").toBoolean()) {
                                         versionType.set("beta")
                                     } else {
@@ -518,10 +555,10 @@ subprojects ModProject@ {
                         } else {
                             mainFile.releaseType = "release"
                         }
-                        mainFile.gameVersions.add("forge")
-                        mainFile.gameVersions.add(minecraftVersion)
-                        mainFile.gameVersions.add("Java 17")
-                        mainFile.displayName = "${modName} ${modVersion} (Forge ${minecraftVersion})"
+                        mainFile.addGameVersion("forge")
+                        mainFile.addGameVersion(minecraftVersion)
+                        mainFile.addJavaVersion("Java 17")
+                        mainFile.displayName = "$modName $modVersion (Forge ${minecraftVersion})"
 
                         if (System.getenv().containsKey("CHANGELOG")) {
                             mainFile.changelog = System.getenv("CHANGELOG").toString()
@@ -549,7 +586,7 @@ if (System.getenv().containsKey("RELEASE_NAME")) {
                 }
             }
         } else {
-            println("Skipping: ${name}")
+            println("Skipping: $name")
         }
     }
 }
