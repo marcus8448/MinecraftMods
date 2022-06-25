@@ -550,7 +550,7 @@ subprojects ModProject@ {
                 if (curseforgeId.isNotBlank() && System.getenv().containsKey("CURSEFORGE_TOKEN")) {
                     apply(plugin = "net.darkhax.curseforgegradle")
 
-                    tasks.create("publishCurseForge", net.darkhax.curseforgegradle.TaskPublishCurseForge::class) {
+                    tasks.create("publishCurseforge", net.darkhax.curseforgegradle.TaskPublishCurseForge::class) {
                         apiToken = System.getenv("CURSEFORGE_TOKEN").toString()
                         val mainFile = upload(curseforgeId, tasks.getByName("jar"))
                         if (System.getenv().containsKey("BETA") && System.getenv("BETA").toBoolean()) {
