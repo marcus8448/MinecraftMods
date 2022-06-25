@@ -23,6 +23,7 @@ buildscript {
                 includeGroup("org.apache.httpcomponents")
                 includeGroup("org.apache.httpcomponents.client5")
                 includeGroup("org.apache.httpcomponents.core5")
+                includeGroup("org.apache.logging")
                 includeGroup("org.apache.logging.log4j")
                 includeGroup("org.apache.maven")
                 includeGroup("org.cadixdev")
@@ -31,6 +32,7 @@ buildscript {
                 includeGroup("org.immutables")
                 includeGroup("org.jetbrains")
                 includeGroup("org.jetbrains.kotlinx")
+                includeGroup("org.junit")
                 includeGroup("org.ow2")
                 includeGroup("org.ow2.asm")
                 includeGroup("org.slf4j")
@@ -138,6 +140,7 @@ subprojects ModProject@ {
         }
 
         configure<JavaPluginExtension> {
+            toolchain.languageVersion.set(JavaLanguageVersion.of(17))
             sourceCompatibility = JavaVersion.VERSION_17
             targetCompatibility = JavaVersion.VERSION_17
             withSourcesJar()
@@ -522,7 +525,7 @@ subprojects ModProject@ {
                                 configure<com.modrinth.minotaur.ModrinthExtension> {
                                     token.set(System.getenv("MODRINTH_TOKEN"))
                                     projectId.set(modrinthId)
-                                    versionNumber.set("{$decoratedModVersion}-forge")
+                                    versionNumber.set("${decoratedModVersion}-forge")
                                     versionName.set("$modName v${this@ModProject.version} (Forge)")
                                     if (System.getenv().containsKey("BETA") && System.getenv("BETA").toBoolean()) {
                                         versionType.set("beta")

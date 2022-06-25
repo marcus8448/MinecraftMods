@@ -17,11 +17,11 @@
 package io.github.marcus8448.gamemodeoverhaul;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
 public class GamemodeOverhaulFabric implements ModInitializer {
     @Override
     public void onInitialize() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> GamemodeOverhaulCommon.registerCommands(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, registry, environment) -> GamemodeOverhaulCommon.registerCommands(dispatcher));
     }
 }

@@ -21,12 +21,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.github.marcus8448.gamemodeoverhaul.platform.Services;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.commands.DifficultyCommand;
 import net.minecraft.server.level.ServerLevel;
@@ -170,15 +168,15 @@ public class GamemodeOverhaulCommon {
 
 
     private static void logGamemodeChange(@Nonnull CommandSourceStack context, ServerPlayer player, @Nonnull GameType type) {
-        Component text = new TranslatableComponent("gameMode." + type.getName());
+        Component text = Component.translatable("gameMode." + type.getName());
         if (context.getEntity() == player) {
-            context.sendSuccess(new TranslatableComponent("commands.gamemode.success.self", text), true);
+            context.sendSuccess(Component.translatable("commands.gamemode.success.self", text), true);
         } else {
             if (context.getLevel().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
-                player.sendMessage(new TranslatableComponent("gameMode.changed", text), Util.NIL_UUID);
+                player.sendSystemMessage(Component.translatable("gameMode.changed", text));
             }
 
-            context.sendSuccess(new TranslatableComponent("commands.gamemode.success.other", player.getDisplayName(), text), true);
+            context.sendSuccess(Component.translatable("commands.gamemode.success.other", player.getDisplayName(), text), true);
         }
     }
 
@@ -208,7 +206,7 @@ public class GamemodeOverhaulCommon {
             }
         }
 
-        source.sendSuccess(new TranslatableComponent("commands.defaultgamemode.success", type.getLongDisplayName()), true);
+        source.sendSuccess(Component.translatable("commands.defaultgamemode.success", type.getLongDisplayName()), true);
         return i;
     }
 
@@ -219,7 +217,7 @@ public class GamemodeOverhaulCommon {
         } else {
             level.setWeatherParameters(6000, 0, false, false);
         }
-        source.sendSuccess(new TranslatableComponent("commands.toggledownfall"), false);
+        source.sendSuccess(Component.translatable("commands.toggledownfall"), false);
         return 1;
     }
 }
