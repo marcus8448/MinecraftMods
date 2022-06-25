@@ -21,7 +21,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class FabricConfig implements GamemodeOverhaulConfig {
@@ -40,19 +43,27 @@ public class FabricConfig implements GamemodeOverhaulConfig {
     public static FabricConfig create() {
         File file = FabricLoader.getInstance().getConfigDir().resolve("gamemodeoverhaul.json").toFile();
         if (file.exists()) {
-            try {
-                return GSON.fromJson(new FileReader(file), FabricConfig.class);
-            } catch (FileNotFoundException e) {
+            try (FileReader json = new FileReader(file)) {
+                FabricConfig config = GSON.fromJson(json, FabricConfig.class);
+                if (config != null) {
+                    return config;
+                } else {
+                    Constant.LOGGER.warn("Failed to read the gamemodeoverhaul config file. Regenerating it...");
+                    file.delete();
+                }
+            } catch (IOException e) {
                 throw new RuntimeException("Failed to read configuration file!", e);
             }
-        } else {
-            try {
-                FabricConfig src = new FabricConfig();
-                GSON.toJson(src, new FileWriter(file));
-                return src;
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to create configuration file!", e);
+        }
+        try {
+            FabricConfig src = new FabricConfig();
+            try (FileWriter writer = new FileWriter(file)) {
+                GSON.toJson(src, writer);
+                writer.flush();
             }
+            return src;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create configuration file!", e);
         }
     }
 
