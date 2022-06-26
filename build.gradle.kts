@@ -89,6 +89,10 @@ buildscript {
     }
 }
 
+fun parseJson(file: File): MutableMap<String, Any> {
+    return groovy.json.JsonSlurper().parse(file) as MutableMap<String, Any>
+}
+
 subprojects ModProject@ {
     val minecraftVersion = project.property("minecraft.version").toString()
     val minecraftVersionMajorMinor = minecraftVersion.split(".")[0] + "." + minecraftVersion.split(".")[1]
@@ -134,7 +138,7 @@ subprojects ModProject@ {
         tasks.withType(ProcessResources::class) {
             doLast {
                 fileTree(mapOf("dir" to outputs.files.asPath, "includes" to listOf("**/*.json", "**/*.mcmeta"))).forEach {
-                        file: File -> file.writeText(groovy.json.JsonOutput.toJson(groovy.json.JsonSlurper().parse(file)))
+                        file: File -> file.writeText(groovy.json.JsonOutput.toJson(parseJson(file)))
                 }
             }
         }
@@ -233,21 +237,47 @@ subprojects ModProject@ {
                         accessWidenerPath.set(project.file("src/main/resources/${modId}.accesswidener"))
                     }
 
+                    mods {
+                        register(modId) {
+                            sourceSet(sourceSets["main"])
+                            sourceSet(commonMainSourceSet)
+                        }
+                    }
+
                     runs {
                         getByName("client") {
                             client()
-                            configName = "Fabric Client"
+                            configName = "$modName Fabric Client"
                             ideConfigGenerated(true)
                             runDir("run")
                         }
                         getByName("server") {
                             server()
-                            configName = "Fabric Server"
+                            configName = "$modName Fabric Server"
+                            vmArg("-ea")
                             ideConfigGenerated(true)
                             runDir("run")
                         }
+                        if (fabricModules.contains("fabric-data-generation-api-v1") || (parseJson(file("src/main/resources/fabric.mod.json"))["entrypoints"] as Map<String, Any>).containsKey("fabric-datagen")) {
+                            create("datagen") {
+                                server()
+                                configName = "$modName Datagen"
+                                vmArgs("-Dfabric-api.datagen", "-Dfabric-api.datagen.output-dir=${file("src/main/generated")}", "-Dfabric-api.datagen.strict-validation")
+                                ideConfigGenerated(true)
+                                runDir("build/datagen")
+                            }
+                            create("datagenClient") {
+                                client()
+                                configName = "$modName Datagen Client"
+                                vmArgs("-Dfabric-api.datagen", "-Dfabric-api.datagen.output-dir=${file("src/main/generated")}", "-Dfabric-api.datagen.strict-validation")
+                                ideConfigGenerated(true)
+                                runDir("build/datagen")
+                            }
+                        }
                     }
                 }
+
+                sourceSets["main"].resources.srcDir("src/main/generated")
 
                 dependencies {
                     "minecraft"("com.mojang:minecraft:${minecraftVersion}")
@@ -278,8 +308,19 @@ subprojects ModProject@ {
                     }
                 }
 
+                tasks.withType(Jar::class) {
+                    from(commonMainSourceSet.output)
+                }
+
+                tasks.withType(Javadoc::class) {
+                    source(commonMainSourceSet.allJava)
+                }
+
+                tasks.getByName<Jar>("sourcesJar") {
+                    from(commonMainSourceSet.allSource)
+                }
+
                 tasks.withType(ProcessResources::class) {
-                    from(commonMainSourceSet.resources)
                     filesMatching("fabric.mod.json") {
                         val map = HashMap(this@ModProject.properties)
                         map["mc_major_minor"] = minecraftVersionMajorMinor
@@ -289,7 +330,7 @@ subprojects ModProject@ {
                     doLast {
                         val modJson = outputs.files.singleFile.resolve("fabric.mod.json")
                         if (modJson.exists()) {
-                            val json = groovy.json.JsonSlurper().parse(modJson) as MutableMap<String, Any>
+                            val json = parseJson(modJson) as MutableMap<String, Any>
                             run {
                                 var file1: File
                                 if (!json.containsKey("mixins")) {
@@ -323,14 +364,7 @@ subprojects ModProject@ {
                             }
                             modJson.writeText(groovy.json.JsonOutput.toJson(json))
                         }
-                        fileTree(mapOf("dir" to outputs.files.asPath, "includes" to listOf("**/*.json", "**/*.mcmeta"))).forEach {
-                                file1: File -> file1.writeText(groovy.json.JsonOutput.toJson(groovy.json.JsonSlurper().parse(file1)))
-                        }
                     }
-                }
-
-                tasks.withType(JavaCompile::class) {
-                    source(commonMainSourceSet.allSource)
                 }
 
                 configure<PublishingExtension> {
@@ -459,7 +493,7 @@ subprojects ModProject@ {
                         create("data") {
                             workingDirectory(project.file("run"))
                             ideaModule("${rootProject.name}.${this@ModProject.name}.${project.name}.main")
-                            args("--mod", modId, "--all", "--output", file("src/generated/resources/"), "--existing", file("src/main/resources/"))
+                            args("--mod", modId, "--all", "--output", file("src/main/generated/"), "--existing", file("src/main/resources/"))
                             property("mixin.env.remapRefMap", "true")
                             property("mixin.env.refMapRemappingFile", "${projectDir}/build/createSrgToMcp/output.srg")
                             mods {
@@ -471,7 +505,7 @@ subprojects ModProject@ {
                         }
                     }
                 }
-                sourceSets["main"].resources.srcDir("src/generated/resources")
+                sourceSets["main"].resources.srcDir("src/main/generated")
 
                 dependencies {
                     "minecraft"("net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}")
