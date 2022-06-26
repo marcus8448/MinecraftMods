@@ -122,7 +122,7 @@ subprojects ModProject@ {
     val modName = project.property("mod.name").toString()
     val modId = project.property("mod.id").toString()
     val modGroup = project.property("mod.group").toString()
-    val modAuthor = project.property("mod.author").toString()
+    val modAuthors = project.property("mod.authors").toString().split(",")
     val modVersion = project.property("mod.version").toString()
     val modDescription = project.property("mod.description").toString()
     val modStartYear = Integer.parseInt(project.property("mod.start_year").toString())
@@ -213,7 +213,18 @@ subprojects ModProject@ {
         configure<org.cadixdev.gradle.licenser.LicenseExtension> {
             properties {
                 set("mod", modName)
-                set("author", modAuthor)
+                set("author", if (modAuthors.size == 1) {
+                    modAuthors[0]
+                } else {
+                    var s = "";
+                    for ((index, author) in modAuthors.withIndex()) {
+                        if (index != 0) {
+                            s += ", "
+                        }
+                        s += author
+                    }
+                    s
+                })
                 set("year_desc", if (modStartYear == currentYear) {
                     currentYear
                 } else {
@@ -253,13 +264,13 @@ subprojects ModProject@ {
             manifest {
                 attributes(
                     "Specification-Title"       to modName,
-                    "Specification-Vendor"      to modAuthor,
+                    "Specification-Vendor"      to modAuthors[0],
                     "Specification-Version"     to modVersion,
                     "Implementation-Title"      to project.name,
                     "Implementation-Version"    to this@Jar.archiveVersion,
-                    "Implementation-Vendor"     to modAuthor,
+                    "Implementation-Vendor"     to modAuthors[0],
                     "Implementation-Timestamp"  to java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ISO_DATE_TIME),
-                    "Timestamp"                to System.currentTimeMillis(),
+                    "Timestamp"                 to System.currentTimeMillis(),
                     "Built-On-Java"             to "${System.getProperty("java.vm.version")} (${System.getProperty("java.vm.vendor")})",
                     "Built-On-Minecraft"        to minecraftVersion,
                     "Automatic-Module-Name"     to modId
@@ -436,7 +447,6 @@ subprojects ModProject@ {
                             "mod_name" to modName,
                             "mod_version" to modVersion,
                             "mod_description" to modDescription,
-                            "mod_author" to modAuthor,
                             "mc_major_minor" to minecraftVersionMajorMinor,
                             "project_name" to this@ModProject.name,
                             "java_version" to javaVersion
@@ -447,38 +457,38 @@ subprojects ModProject@ {
                         val modJson = outputs.files.singleFile.resolve("fabric.mod.json")
                         if (modJson.exists()) {
                             val json = parseJson(modJson)
-                            run {
-                                var file1: File
-                                if (!json.containsKey("mixins")) {
-                                    val mixins = ArrayList<String>()
-                                    file1 = modJson.resolveSibling("${modId}.mixins.json")
-                                    if (file1.exists()) mixins.add(file1.name)
-                                    file1 = modJson.resolveSibling("${modId}.client.mixins.json")
-                                    if (file1.exists()) mixins.add(file1.name)
-                                    file1 = modJson.resolveSibling("${modId}.server.mixins.json")
-                                    if (file1.exists()) mixins.add(file1.name)
-                                    json["mixins"] = mixins
-                                }
-                                if (!json.containsKey("accessWidener")) {
-                                    file1 = modJson.resolveSibling("${modId}.accesswidener")
-                                    if (file1.exists()) json["accessWidener"] = file1.name
-                                }
-
-                                if (!json.containsKey("icon")) {
-                                    file1 = modJson.resolveSibling("${modId}.png")
-                                    if (file1.exists()) json["icon"] = file1.name
-                                }
-
-                                if (!json.containsKey("license")) json["license"] = "LGPL-3.0-only"
-                                if (!json.containsKey("environment")) json["environment"] = modEnvironment.jsonName
-
-                                val depends = json.obj("depends")
-                                if (fabricModules.isEmpty() || fabricModules[0] == "*") {
-                                    depends["fabric"] = "*"
-                                } else if (fabricModules.isNotEmpty() && fabricModules[0].isNotBlank()) {
-                                    fabricModules.forEach { depends[it] = "*" }
-                                }
+                            var file1: File
+                            if (!json.containsKey("mixins")) {
+                                val mixins = ArrayList<String>()
+                                file1 = modJson.resolveSibling("${modId}.mixins.json")
+                                if (file1.exists()) mixins.add(file1.name)
+                                file1 = modJson.resolveSibling("${modId}.client.mixins.json")
+                                if (file1.exists()) mixins.add(file1.name)
+                                file1 = modJson.resolveSibling("${modId}.server.mixins.json")
+                                if (file1.exists()) mixins.add(file1.name)
+                                json["mixins"] = mixins
                             }
+                            if (!json.containsKey("accessWidener")) {
+                                file1 = modJson.resolveSibling("${modId}.accesswidener")
+                                if (file1.exists()) json["accessWidener"] = file1.name
+                            }
+
+                            if (!json.containsKey("icon")) {
+                                file1 = modJson.resolveSibling("${modId}.png")
+                                if (file1.exists()) json["icon"] = file1.name
+                            }
+
+                            if (!json.containsKey("license")) json["license"] = "LGPL-3.0-only"
+                            if (!json.containsKey("environment")) json["environment"] = modEnvironment.jsonName
+                            if (!json.containsKey("authors")) json["authors"] = modAuthors
+
+                            val depends = json.obj("depends")
+                            if (fabricModules.isEmpty() || fabricModules[0] == "*") {
+                                depends["fabric"] = "*"
+                            } else if (fabricModules.isNotEmpty() && fabricModules[0].isNotBlank()) {
+                                fabricModules.forEach { depends[it] = "*" }
+                            }
+
                             modJson.writeText(groovy.json.JsonOutput.toJson(json))
                         }
                     }
@@ -597,7 +607,18 @@ subprojects ModProject@ {
                             "mod_name" to modName,
                             "mod_version" to modVersion,
                             "mod_description" to modDescription,
-                            "mod_author" to modAuthor,
+                            "mod_authors" to if (modAuthors.size == 1) {
+                                modAuthors[0]
+                            } else {
+                                var s = "";
+                                for ((index, author) in modAuthors.withIndex()) {
+                                    if (index != 0) {
+                                        s += ", "
+                                    }
+                                    s += author
+                                }
+                                s
+                            },
                             "forge_major" to forgeVersion.split(".")[0],
                             "mc_major_minor" to minecraftVersionMajorMinor
                         )
