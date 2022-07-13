@@ -705,7 +705,7 @@ subprojects ModProject@ {
 
                     if (modrinthId.isNotBlank() && System.getenv().containsKey("MODRINTH_TOKEN")) {
                         apply(plugin = "com.modrinth.minotaur")
-                        configureModrinth(tasks.getByName("remapJar"), deps = {})
+                        configureModrinth(tasks.getByName("jar"), deps = {})
                     }
 
                     if (curseforgeId.isNotBlank() && System.getenv().containsKey("CURSEFORGE_TOKEN")) {
