@@ -15,24 +15,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/.
  */
 
-package io.github.marcus8448.gamemodeoverhaul;
+package io.github.marcus8448.gamemodeoverhaul.compat;
 
-public interface GamemodeOverhaulConfig {
-    boolean enableGamemode();
-    boolean enableGm();
-    boolean enableNoArgsGm();
-    boolean enableDefaultGamemode();
-    boolean enableDgm();
-    boolean enableDifficulty();
-    boolean enableToggledownfall();
+import com.terraformersmc.modmenu.api.ConfigScreenFactory;
+import com.terraformersmc.modmenu.api.ModMenuApi;
+import net.fabricmc.loader.api.FabricLoader;
 
-    void enableGamemode(boolean value);
-    void enableGm(boolean value);
-    void enableNoArgsGm(boolean value);
-    void enableDefaultGamemode(boolean value);
-    void enableDgm(boolean value);
-    void enableDifficulty(boolean value);
-    void enableToggledownfall(boolean value);
-
-    void save();
+public class ModMenuHook implements ModMenuApi {
+    @Override
+    public ConfigScreenFactory<?> getModConfigScreenFactory() {
+        if (FabricLoader.getInstance().isModLoaded("cloth-config")) {
+            return ClothConfigScreen::createScreenFactory;
+        }
+        return screen -> null;
+    }
 }

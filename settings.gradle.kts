@@ -1,3 +1,8 @@
 rootProject.name = "MinecraftMods"
 
-include(":GamemodeOverhaul", ":GamemodeOverhaul:Common", ":GamemodeOverhaul:Fabric", ":GamemodeOverhaul:Forge")
+fun mod(name: String) {
+    include(":${name}", ":${name}:Common", ":${name}:Fabric", ":${name}:Forge")
+}
+
+mod("GamemodeOverhaul")
+mod("Template")

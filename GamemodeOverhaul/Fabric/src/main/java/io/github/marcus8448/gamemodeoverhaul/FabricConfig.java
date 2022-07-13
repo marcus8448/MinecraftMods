@@ -30,35 +30,36 @@ import java.io.IOException;
 @SuppressWarnings("FieldCanBeLocal")
 public class FabricConfig implements GamemodeOverhaulConfig {
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+    private static final File FILE = FabricLoader.getInstance().getConfigDir().resolve("gamemodeoverhaul.json").toFile();
 
-    private final boolean enableGamemode = true;
-    private final boolean enableGm = true;
-    private final boolean enableNoArgsGm = false;
-    private final boolean enableDefaultGamemode = true;
-    private final boolean enableDgm = false;
-    private final boolean enableDifficulty = true;
-    private final boolean enableToggledownfall = true;
+    private boolean enableGamemode = true;
+    private boolean enableGm = true;
+    private boolean enableNoArgsGm = false;
+    private boolean enableDefaultGamemode = true;
+    private boolean enableDgm = false;
+    private boolean enableDifficulty = true;
+    private boolean enableToggledownfall = true;
 
     private FabricConfig() {}
 
     public static FabricConfig create() {
-        File file = FabricLoader.getInstance().getConfigDir().resolve("gamemodeoverhaul.json").toFile();
-        if (file.exists()) {
-            try (FileReader json = new FileReader(file)) {
+        if (FILE.exists()) {
+            try (FileReader json = new FileReader(FILE)) {
                 FabricConfig config = GSON.fromJson(json, FabricConfig.class);
                 if (config != null) {
                     return config;
                 } else {
                     Constant.LOGGER.warn("Failed to read the gamemodeoverhaul config file. Regenerating it...");
-                    file.delete();
+                    FILE.delete();
                 }
             } catch (IOException e) {
                 throw new RuntimeException("Failed to read configuration file!", e);
             }
         }
         try {
+            FILE.getParentFile().mkdirs();
             FabricConfig src = new FabricConfig();
-            try (FileWriter writer = new FileWriter(file)) {
+            try (FileWriter writer = new FileWriter(FILE)) {
                 GSON.toJson(src, writer);
                 writer.flush();
             }
@@ -101,5 +102,50 @@ public class FabricConfig implements GamemodeOverhaulConfig {
     @Override
     public boolean enableToggledownfall() {
         return this.enableToggledownfall;
+    }
+
+    @Override
+    public void enableGamemode(boolean value) {
+        this.enableGamemode = value;
+    }
+
+    @Override
+    public void enableGm(boolean value) {
+        this.enableGm = value;
+    }
+
+    @Override
+    public void enableNoArgsGm(boolean value) {
+        this.enableNoArgsGm = value;
+    }
+
+    @Override
+    public void enableDefaultGamemode(boolean value) {
+        this.enableDefaultGamemode = value;
+    }
+
+    @Override
+    public void enableDgm(boolean value) {
+        this.enableDgm = value;
+    }
+
+    @Override
+    public void enableDifficulty(boolean value) {
+        this.enableDifficulty = value;
+    }
+
+    @Override
+    public void enableToggledownfall(boolean value) {
+        this.enableToggledownfall = value;
+    }
+
+    @Override
+    public void save() {
+        try (FileWriter writer = new FileWriter(FILE)) {
+            GSON.toJson(this, writer);
+            writer.flush();
+        } catch (IOException e) {
+            Constant.LOGGER.error("Failed to save config file!", e);
+        }
     }
 }

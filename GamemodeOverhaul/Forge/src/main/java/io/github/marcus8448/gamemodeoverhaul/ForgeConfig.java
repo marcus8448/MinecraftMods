@@ -75,6 +75,46 @@ public class ForgeConfig implements GamemodeOverhaulConfig {
         return this.common.enableToggledownfall.get();
     }
 
+    @Override
+    public void enableGamemode(boolean value) {
+        this.common.enableGamemode.set(value);
+    }
+
+    @Override
+    public void enableGm(boolean value) {
+        this.common.enableGm.set(value);
+    }
+
+    @Override
+    public void enableNoArgsGm(boolean value) {
+        this.common.enableNoArgsGm.set(value);
+    }
+
+    @Override
+    public void enableDefaultGamemode(boolean value) {
+        this.common.enableDefaultGamemode.set(value);
+    }
+
+    @Override
+    public void enableDgm(boolean value) {
+        this.common.enableDgm.set(value);
+    }
+
+    @Override
+    public void enableDifficulty(boolean value) {
+        this.common.enableDifficulty.set(value);
+    }
+
+    @Override
+    public void enableToggledownfall(boolean value) {
+        this.common.enableToggledownfall.set(value);
+    }
+
+    @Override
+    public void save() {
+        //no-op on forge
+    }
+
     public static class Common {
         final ForgeConfigSpec.BooleanValue enableGamemode;
         final ForgeConfigSpec.BooleanValue enableGm;
@@ -86,13 +126,13 @@ public class ForgeConfig implements GamemodeOverhaulConfig {
 
         Common(@Nonnull ForgeConfigSpec.Builder builder) {
             builder.comment("GamemodeOverhaul's command config settings").push("commands");
-            this.enableGamemode = builder.comment("Set this to false if you don't want the mod to add additional arguments to the '/gamemode' command").translation("gamemodeoverhaul.config.enable_gamemode").worldRestart().define("enableGamemode", true);
-            this.enableGm = builder.comment("Set this to false if you don't want the mod to add the '/gm' command").translation("gamemodeoverhaul.config.enable_gm").worldRestart().define("enableGm", true);
-            this.enableNoArgsGm = builder.comment("Set this to false if you don't the mod to add '/gmc', '/gms', '/gmsp' and '/gma' commands").translation("gamemodeoverhaul.config.enable_no_args_gm").worldRestart().define("enableNoArgsGm", false);
-            this.enableDefaultGamemode = builder.comment("Set this to false if you don't want the mod to add additional arguments to the '/defaultgamemode' command").translation("gamemodeoverhaul.config.enable_default_gamemode").worldRestart().define("enableDefaultGamemode", true);
-            this.enableDgm = builder.comment("Set this to false if you don't want the mod to add the '/dgm' command").translation("gamemodeoverhaul.config.enable_dgm").worldRestart().define("enableDgm", false);
-            this.enableDifficulty = builder.comment("Set this to false if you don't want the mod to add the integer values for '/difficulty'").translation("gamemodeoverhaul.config.enable_difficulty").worldRestart().define("enableDifficulty", true);
-            this.enableToggledownfall = builder.comment("Set this to false if you don't want to have the mod add '/toggledownfall' back").translation("gamemodeoverhaul.config.enable_toggledownfall").worldRestart().define("enableToggledownfall", true);
+            this.enableGamemode = builder.comment("Set this to false if you don't want the mod to add additional arguments to the '/gamemode' command").translation("option.gamemodeoverhaul.enable_gamemode").worldRestart().define("enableGamemode", true);
+            this.enableGm = builder.comment("Set this to false if you don't want the mod to add the '/gm' command").translation("option.gamemodeoverhaul.enable_gm").worldRestart().define("enableGm", true);
+            this.enableNoArgsGm = builder.comment("Set this to false if you don't the mod to add '/gmc', '/gms', '/gmsp' and '/gma' commands").translation("option.gamemodeoverhaul.enable_no_args_gm").worldRestart().define("enableNoArgsGm", false);
+            this.enableDefaultGamemode = builder.comment("Set this to false if you don't want the mod to add additional arguments to the '/defaultgamemode' command").translation("option.gamemodeoverhaul.enable_default_gamemode").worldRestart().define("enableDefaultGamemode", true);
+            this.enableDgm = builder.comment("Set this to false if you don't want the mod to add the '/dgm' command").translation("option.gamemodeoverhaul.enable_dgm").worldRestart().define("enableDgm", false);
+            this.enableDifficulty = builder.comment("Set this to false if you don't want the mod to add the integer values for '/difficulty'").translation("option.gamemodeoverhaul.enable_difficulty").worldRestart().define("enableDifficulty", true);
+            this.enableToggledownfall = builder.comment("Set this to false if you don't want to have the mod add '/toggledownfall' back").translation("option.gamemodeoverhaul.enable_toggledownfall").worldRestart().define("enableToggledownfall", true);
 
             builder.pop();
         }

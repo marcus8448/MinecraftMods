@@ -10,10 +10,7 @@
   },
   "entrypoints": {
     "main": [
-      "io.github.marcus8448.gamemodeoverhaul.GamemodeOverhaulFabric"
-    ],
-    "modmenu": [
-      "io.github.marcus8448.gamemodeoverhaul.compat.ModMenuHook"
+      "io.github.marcus8448.template.TemplateFabric"
     ]
   },
   "depends": {
