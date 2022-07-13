@@ -19,6 +19,7 @@ package io.github.marcus8448.gamemodeoverhaul;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -33,8 +34,13 @@ public class GamemodeOverhaulForge {
     public GamemodeOverhaulForge() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CONFIG.commonSpec);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(CONFIG::onLoad);
-
         MinecraftForge.EVENT_BUS.addListener(this::registerCommands);
+
+        //ignore version check as we only need to be on the logical server.
+        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class,
+                () -> new IExtensionPoint.DisplayTest(
+                        () -> IExtensionPoint.DisplayTest.IGNORESERVERONLY,
+                        (remoteVersion, isFromServer) -> true));
     }
     
     private void registerCommands(@Nonnull RegisterCommandsEvent event) {
