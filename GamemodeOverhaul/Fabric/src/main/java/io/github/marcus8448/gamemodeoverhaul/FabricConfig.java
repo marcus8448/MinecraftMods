@@ -49,7 +49,7 @@ public class FabricConfig implements GamemodeOverhaulConfig {
                 if (config != null) {
                     return config;
                 } else {
-                    Constant.LOGGER.warn("Failed to read the gamemodeoverhaul config file. Regenerating it...");
+                    GamemodeOverhaulCommon.LOGGER.warn("Failed to read the gamemodeoverhaul config file. Regenerating it...");
                     FILE.delete();
                 }
             } catch (IOException e) {
@@ -145,7 +145,7 @@ public class FabricConfig implements GamemodeOverhaulConfig {
             GSON.toJson(this, writer);
             writer.flush();
         } catch (IOException e) {
-            Constant.LOGGER.error("Failed to save config file!", e);
+            GamemodeOverhaulCommon.LOGGER.error("Failed to save config file!", e);
         }
     }
 }

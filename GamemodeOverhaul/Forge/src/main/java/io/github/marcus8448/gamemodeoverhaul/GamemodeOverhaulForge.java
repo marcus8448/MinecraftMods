@@ -17,6 +17,7 @@
 
 package io.github.marcus8448.gamemodeoverhaul;
 
+import io.github.marcus8448.gamemodeoverhaul.client.GamemodeOverhaulClientForge;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.fml.IExtensionPoint;
@@ -24,10 +25,11 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import javax.annotation.Nonnull;
 
-@Mod(Constant.MOD_ID)
+@Mod(GamemodeOverhaulCommon.MOD_ID)
 public class GamemodeOverhaulForge {
     public static final ForgeConfig CONFIG = new ForgeConfig();
 
@@ -41,6 +43,10 @@ public class GamemodeOverhaulForge {
                 () -> new IExtensionPoint.DisplayTest(
                         () -> IExtensionPoint.DisplayTest.IGNORESERVERONLY,
                         (remoteVersion, isFromServer) -> true));
+
+        if (FMLEnvironment.dist.isClient()) {
+            MinecraftForge.EVENT_BUS.addListener(GamemodeOverhaulClientForge::registerClientCommands);
+        }
     }
     
     private void registerCommands(@Nonnull RegisterCommandsEvent event) {

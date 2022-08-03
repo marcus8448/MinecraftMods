@@ -4,10 +4,6 @@
   "version": "${mod_version}",
   "name": "${mod_name}",
   "description": "${mod_description}",
-  "contact": {
-    "homepage": "https://github.com/marcus8448/MinecraftMods/tree/${mc_major_minor}/${project_name}",
-    "sources": "https://github.com/marcus8448/MinecraftMods"
-  },
   "entrypoints": {
     "main": [
       "io.github.marcus8448.template.TemplateFabric"

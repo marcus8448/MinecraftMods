@@ -31,7 +31,7 @@ public class ForgeConfig implements GamemodeOverhaulConfig {
 
     @SubscribeEvent
     public void onLoad(ModConfigEvent.Loading configEvent) {
-        Constant.LOGGER.debug("Successfully loaded GamemodeOverhaul's config file!");
+        GamemodeOverhaulCommon.LOGGER.debug("Successfully loaded GamemodeOverhaul's config file!");
     }
 
     public ForgeConfig() {

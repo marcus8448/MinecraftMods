@@ -507,6 +507,13 @@ subprojects ModProject@ {
                                     if (file1.exists()) json["accessWidener"] = file1.name
                                 }
 
+                                if (!json.containsKey("contact")) {
+                                    val contact = HashMap<String, Any>();
+                                    contact["homepage"] = "https://github.com/marcus8448/MinecraftMods/tree/${minecraftVersionMajorMinor}/${this@ModProject.name}"
+                                    contact["sources"] = "https://github.com/marcus8448/MinecraftMods/tree/"
+                                    json["contact"] = contact;
+                                }
+
                                 if (!json.containsKey("icon")) {
                                     file1 = modJson.resolveSibling("${modId}.png")
                                     if (file1.exists()) json["icon"] = file1.name

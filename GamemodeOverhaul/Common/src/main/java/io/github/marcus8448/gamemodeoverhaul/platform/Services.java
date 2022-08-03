@@ -17,7 +17,7 @@
 
 package io.github.marcus8448.gamemodeoverhaul.platform;
 
-import io.github.marcus8448.gamemodeoverhaul.Constant;
+import io.github.marcus8448.gamemodeoverhaul.GamemodeOverhaulCommon;
 import io.github.marcus8448.gamemodeoverhaul.platform.services.Platform;
 
 import java.util.ServiceLoader;
@@ -29,7 +29,7 @@ public class Services {
         final T loadedService = ServiceLoader.load(clazz)
                 .findFirst()
                 .orElseThrow(() -> new NullPointerException("Failed to load service for " + clazz.getName()));
-        Constant.LOGGER.debug("Loaded {} for service {}", loadedService, clazz);
+        GamemodeOverhaulCommon.LOGGER.debug("Loaded {} for service {}", loadedService, clazz);
         return loadedService;
     }
 }
