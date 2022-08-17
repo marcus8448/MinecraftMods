@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     branches:
-      - main
+      - 1.19
 
 jobs:
   Build:
@@ -22,8 +22,12 @@ jobs:
           java-version: 17
           distribution: temurin
 
-      - name: Build
-        id: build
+      - name: Check licenses
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: checkLicenses build
+          arguments: checkLicenses
+
+      - name: Build
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build

@@ -230,7 +230,7 @@ subprojects ModProject@ {
             group = modGroup
 
             configure<BasePluginExtension> {
-                archivesName.set("${modName}-${name.toLowerCase()}")
+                archivesName.set("${modId}-${name.toLowerCase()}")
             }
 
             configure<org.cadixdev.gradle.licenser.LicenseExtension> {
@@ -353,6 +353,7 @@ subprojects ModProject@ {
                                     this@SubProject.extensions.getByType(BasePluginExtension::class).archivesName.get()
                                 version = this@SubProject.version.toString()
                                 from(components["java"])
+                                addPomInfo(modName, modDescription, modAuthors)
                             }
                         }
 
@@ -557,6 +558,7 @@ subprojects ModProject@ {
                                     this@SubProject.extensions.getByType(BasePluginExtension::class).archivesName.get()
                                 version = this@SubProject.version.toString()
                                 from(components["java"])
+                                addPomInfo(modName, modDescription, modAuthors)
                             }
                         }
 
@@ -702,6 +704,7 @@ subprojects ModProject@ {
                                     this@SubProject.extensions.getByType(BasePluginExtension::class).archivesName.get()
                                 version = this@SubProject.version.toString()
                                 artifact(tasks["jar"])
+                                addPomInfo(modName, modDescription, modAuthors)
                             }
                         }
 
@@ -845,6 +848,7 @@ subprojects ModProject@ {
                     artifactId = this@ModProject.extensions.getByType(BasePluginExtension::class).archivesName.get()
                     version = this@ModProject.version.toString()
                     from(components["java"])
+                    addPomInfo(modName, modDescription, modAuthors)
                 }
             }
 
@@ -854,6 +858,7 @@ subprojects ModProject@ {
         }
     }
 }
+
 
 if (System.getenv().containsKey("RELEASE_NAME")) {
     val publishRelease = tasks.create("publishRelease") {}
@@ -870,6 +875,50 @@ if (System.getenv().containsKey("RELEASE_NAME")) {
             }
         } else {
             println("Skipping: $name")
+        }
+    }
+}
+
+fun MavenPublication.addPomInfo(modName: String, modDescription: String, modAuthors: List<String>) {
+    pom {
+        name.set(modName)
+        description.set(modDescription)
+
+        organization {
+            name.set("marcus8448")
+            url.set("https://github.com/marcus8448")
+        }
+
+        developers {
+            modAuthors.forEach() {
+                developer {
+                    id.set(it)
+                    name.set(it)
+                }
+            }
+        }
+
+        scm {
+            url.set("https://github.com/marcus8448/MinecraftMods")
+            connection.set("scm:git:git://github.com/marcus8448/MinecraftMods.git")
+            developerConnection.set("scm:git:git@github.com:marcus8448/MinecraftMods.git")
+        }
+
+        issueManagement {
+            system.set("github")
+            url.set("https://github.com/marcus8448/MinecraftMods/issues")
+        }
+
+        ciManagement {
+            system.set("github-actions")
+            url.set("https://github.com/marcus8448/MinecraftMods/actions")
+        }
+
+        licenses {
+            license {
+                name.set("LGPL-3.0-only")
+                url.set("https://github.com/marcus8448/MinecraftMods/blob/${minecraftVersionMajorMinor}/LICENSE")
+            }
         }
     }
 }

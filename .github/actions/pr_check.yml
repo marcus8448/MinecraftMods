@@ -21,7 +21,12 @@ jobs:
           java-version: 17
           distribution: temurin
 
+      - name: Check licenses
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: checkLicenses
+
       - name: Build
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: checkLicenses build
+          arguments: build
