@@ -1,0 +1,28 @@
+modLoader="javafml"
+loaderVersion="[${forge_major},)"
+license="LGPL-3.0-only"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+logoFile="${mod_id}.png"
+credits=""
+authors="${mod_authors}"
+description='''
+${mod_description}
+'''
+
+[[dependencies.${mod_id}]]
+    modId="forge"
+    mandatory=true
+    versionRange="[${forge_major},)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[${mc_major_minor},)"
+    ordering="NONE"
+    side="BOTH"

@@ -1,6 +1,6 @@
 /*
  * GamemodeOverhaul
- * Copyright (C) 2019-2022 marcus8448
+ * Copyright (C) 2019-2023 marcus8448
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -20,6 +20,7 @@ package io.github.marcus8448.gamemodeoverhaul;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.github.marcus8448.gamemodeoverhaul.platform.Services;
@@ -58,17 +59,15 @@ public class GamemodeOverhaulCommon {
 
     private static void registerGamemode(@Nonnull CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> node = Commands.literal("gamemode").requires(stack -> stack.hasPermission(2));
-        CommandNode<CommandSourceStack> gamemode = dispatcher.getRoot().getChild("gamemode");
         for (GameType type : GameType.values()) {
-            CommandNode<CommandSourceStack> base = gamemode.getChild(type.getName());
             node.then(Commands.literal(String.valueOf(type.ordinal()))
-                            .executes(base.getCommand())
+                            .executes(gamemodeCommand(dispatcher, type))
                             .then(Commands.argument("target", EntityArgument.players())
-                                    .executes(base.getChild("target").getCommand())))
+                                    .executes(targettedGamemodeCommand(dispatcher, type))))
                     .then(Commands.literal(createShort(type))
-                            .executes(base.getCommand())
+                            .executes(gamemodeCommand(dispatcher, type))
                             .then(Commands.argument("target", EntityArgument.players())
-                                    .executes(base.getChild("target").getCommand())));
+                                    .executes(targettedGamemodeCommand(dispatcher, type))));
         }
         dispatcher.register(node);
     }
@@ -82,24 +81,20 @@ public class GamemodeOverhaulCommon {
     }
 
     private static void registerGmNoArgs(@Nonnull CommandDispatcher<CommandSourceStack> dispatcher) {
-        CommandNode<CommandSourceStack> gamemode = dispatcher.getRoot().getChild("gamemode");
         for (GameType type : GameType.values()) {
-            CommandNode<CommandSourceStack> base = gamemode.getChild(type.getName());
             dispatcher.register(Commands.literal("gm" + createShort(type))
                     .requires(stack -> stack.hasPermission(2))
-                    .executes(base.getCommand())
+                    .executes(gamemodeCommand(dispatcher, type))
                     .then(Commands.argument("target", EntityArgument.players())
-                            .executes(base.getChild("target").getCommand())));
+                            .executes(targetedGamemodeCommandShort(dispatcher, type))));
         }
     }
 
     private static void registerDefaultGamemode(@Nonnull CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> node = Commands.literal("defaultgamemode").requires(stack -> stack.hasPermission(2));
-        CommandNode<CommandSourceStack> defaultgamemode = dispatcher.getRoot().getChild("defaultgamemode");
         for (GameType type : GameType.values()) {
-            Command<CommandSourceStack> base = defaultgamemode.getChild(type.getName()).getCommand();
-            node.then(Commands.literal(String.valueOf(type.ordinal())).executes(base))
-                    .then(Commands.literal(createShort(type)).executes(base));
+            node.then(Commands.literal(String.valueOf(type.ordinal())).executes(defaultgamemodeCommand(dispatcher, type)))
+                    .then(Commands.literal(createShort(type)).executes(defaultgamemodeCommand(dispatcher, type)));
         }
         dispatcher.register(node);
     }
@@ -134,8 +129,32 @@ public class GamemodeOverhaulCommon {
         } else {
             level.setWeatherParameters(0, 6000, true, false);
         }
-        source.sendSuccess(Component.translatable("commands.toggledownfall"), false);
+        source.sendSuccess(() -> Component.translatable("commands.toggle_downfall"), false);
         return 1;
+    }
+
+    public static String getNthArgument(CommandContext<CommandSourceStack> context, int n) {
+        return context.getNodes().get(n).getRange().get(context.getInput());
+    }
+
+    @NotNull
+    private static Command<CommandSourceStack> gamemodeCommand(@NotNull CommandDispatcher<CommandSourceStack> dispatcher, GameType type) {
+        return context -> dispatcher.execute("gamemode " + type.getName(), context.getSource());
+    }
+
+    @NotNull
+    private static Command<CommandSourceStack> defaultgamemodeCommand(@NotNull CommandDispatcher<CommandSourceStack> dispatcher, GameType type) {
+        return context -> dispatcher.execute("defaultgamemode " + type.getName(), context.getSource());
+    }
+
+    @NotNull
+    private static Command<CommandSourceStack> targettedGamemodeCommand(@NotNull CommandDispatcher<CommandSourceStack> dispatcher, GameType type) {
+        return context -> dispatcher.execute("gamemode " + type.getName() + " " + getNthArgument(context, 2), context.getSource());
+    }
+
+    @NotNull
+    private static Command<CommandSourceStack> targetedGamemodeCommandShort(@NotNull CommandDispatcher<CommandSourceStack> dispatcher, GameType type) {
+        return context -> dispatcher.execute("gamemode " + type.getName() + " " + getNthArgument(context, 1), context.getSource());
     }
 
     @Contract(pure = true)

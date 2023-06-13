@@ -1,6 +1,6 @@
 /*
  * GamemodeOverhaul
- * Copyright (C) 2019-2022 marcus8448
+ * Copyright (C) 2019-2023 marcus8448
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -27,10 +27,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.ArgumentSignatures;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.LastSeenMessages;
-import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
@@ -39,7 +36,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
-import java.time.Instant;
 import java.util.List;
 
 public class GamemodeOverhaulClientForge {
@@ -155,9 +151,9 @@ public class GamemodeOverhaulClientForge {
         LocalPlayer player = Minecraft.getInstance().player;
         assert player != null;
         if (level.isRaining() || level.getLevelData().isRaining() || level.isThundering() || level.getLevelData().isThundering()) {
-            player.commandUnsigned("weather clear");
+            player.connection.sendUnsignedCommand("weather clear");
         } else {
-            player.commandUnsigned("weather rain");
+            player.connection.sendUnsignedCommand("weather rain");
         }
         return 1;
     }
@@ -165,11 +161,7 @@ public class GamemodeOverhaulClientForge {
     private static int redirectToServer(@NotNull String command) {
         LocalPlayer player = Minecraft.getInstance().player;
         assert player != null;
-        if (player.commandHasSignableArguments(command)) {
-            return -1;
-        }
-        LastSeenMessages.Update update = player.connection.generateMessageAcknowledgements();
-        player.connection.send(new ServerboundChatCommandPacket(command, Instant.now(), 0L, ArgumentSignatures.EMPTY, false, update));
+        player.connection.sendUnsignedCommand(command);
         return 1;
     }
 

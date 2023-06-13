@@ -5,4 +5,5 @@ fun mod(name: String) {
 }
 
 mod("GamemodeOverhaul")
+mod("Snowy")
 mod("Template")

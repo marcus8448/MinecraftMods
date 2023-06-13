@@ -1,6 +1,6 @@
 /*
  * GamemodeOverhaul
- * Copyright (C) 2019-2022 marcus8448
+ * Copyright (C) 2019-2023 marcus8448
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,28 +18,26 @@
 package io.github.marcus8448.gamemodeoverhaul.client;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.context.StringRange;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.marcus8448.gamemodeoverhaul.GamemodeOverhaulCommon;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.commands.arguments.ArgumentSignatures;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.LastSeenMessages;
-import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
-import java.time.Instant;
 import java.util.List;
 
 public class GamemodeOverhaulFabricClient implements ClientModInitializer {
@@ -148,26 +146,26 @@ public class GamemodeOverhaulFabricClient implements ClientModInitializer {
 
     private static void registerToggleDownfall(@Nonnull CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(ClientCommandManager.literal("toggledownfall").requires(stack -> stack.hasPermission(2))
-                .executes((context) -> toggleDownfall(context.getSource())));
+                .executes(GamemodeOverhaulFabricClient::toggleDownfall));
     }
 
-    private static int toggleDownfall(@Nonnull FabricClientCommandSource source) {
-        ClientLevel level = source.getWorld();
+    private static int toggleDownfall(@Nonnull CommandContext<FabricClientCommandSource> source) throws CommandSyntaxException {
+        ClientLevel level = source.getSource().getWorld();
         if (level.isRaining() || level.getLevelData().isRaining() || level.isThundering() || level.getLevelData().isThundering()) {
-            source.getPlayer().commandUnsigned("weather clear");
+            redirectToServer(source, "weather clear");
         } else {
-            source.getPlayer().commandUnsigned("weather rain");
+            redirectToServer(source, "weather rain");
         }
         return 1;
     }
     
-    private static int redirectToServer(@NotNull CommandContext<FabricClientCommandSource> source, @NotNull String command) {
-        LocalPlayer player = source.getSource().getPlayer();
-        if (player.commandHasSignableArguments(command)) {
-            return -1;
+    private static int redirectToServer(@NotNull CommandContext<FabricClientCommandSource> source, @NotNull String command) throws CommandSyntaxException {
+        ParseResults<SharedSuggestionProvider> serverParse = source.getSource().getPlayer().connection.getCommands().parse(command, source.getSource().getPlayer().connection.getSuggestionsProvider());
+        if (serverParse.getExceptions().isEmpty()) {
+            throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().create(); // todo: mixin around this?
         }
-        LastSeenMessages.Update update = player.connection.generateMessageAcknowledgements();
-        player.connection.send(new ServerboundChatCommandPacket(command, Instant.now(), 0L, ArgumentSignatures.EMPTY, false, update));
+
+        source.getSource().getPlayer().connection.sendUnsignedCommand(command);
         return 1;
     }
 

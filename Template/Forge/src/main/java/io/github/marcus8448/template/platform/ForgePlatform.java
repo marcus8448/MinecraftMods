@@ -1,6 +1,6 @@
 /*
  * Template
- * Copyright (C) 2022 marcus8448
+ * Copyright (C) 2023 marcus8448
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by

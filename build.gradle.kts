@@ -12,10 +12,13 @@ buildscript {
                 includeGroup("com.google.guava")
                 includeGroup("com.google.j2objc")
                 includeGroup("com.machinezoo.noexception")
+                includeGroup("com.squareup.okhttp3")
+                includeGroup("com.squareup.okio")
                 includeGroup("commons-codec")
                 includeGroup("commons-io")
                 includeGroup("commons-logging")
                 includeGroup("de.siegmar")
+                includeGroup("dev.masecla")
                 includeGroup("it.unimi.dsi")
                 includeGroup("net.sf.jopt-simple")
                 includeGroup("net.sf.trove4j")
@@ -32,6 +35,7 @@ buildscript {
                 includeGroup("org.codehaus.plexus")
                 includeGroup("org.immutables")
                 includeGroup("org.jetbrains")
+                includeGroup("org.jetbrains.kotlin")
                 includeGroup("org.jetbrains.kotlinx")
                 includeGroup("org.junit")
                 includeGroup("org.ow2")
@@ -80,12 +84,12 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.modrinth.minotaur:Minotaur:2.3.0")
+        classpath("com.modrinth.minotaur:Minotaur:2.8.0")
         classpath("gradle.plugin.org.cadixdev.gradle:licenser:0.6.1")
-        classpath("io.github.juuxel:loom-quiltflower:1.7.2")
-        classpath("net.darkhax.curseforgegradle:CurseForgeGradle:1.0.11")
-        classpath("net.fabricmc:fabric-loom:0.12-SNAPSHOT")
-        classpath("net.minecraftforge.gradle:ForgeGradle:5.1.+") { isChanging = true }
+        classpath("io.github.juuxel:loom-quiltflower:1.10.0")
+        classpath("net.darkhax.curseforgegradle:CurseForgeGradle:1.1.15")
+        classpath("net.fabricmc:fabric-loom:1.2-SNAPSHOT")
+        classpath("net.minecraftforge.gradle:ForgeGradle:6.0.+") { isChanging = true }
         classpath("org.spongepowered.gradle.vanilla:org.spongepowered.gradle.vanilla.gradle.plugin:0.2.1-SNAPSHOT")
     }
 }
@@ -138,7 +142,7 @@ subprojects ModProject@ {
     val modVersion = project.propertyStr("mod.version")
     val modDescription = project.propertyStr("mod.description")
     val modStartYear = Integer.parseInt(project.propertyStr("mod.start_year"))
-    val modEnvironment = Environment.valueOf(project.propertyOrDefault("mod.environment", "both").toUpperCase())
+    val modEnvironment = Environment.valueOf(project.propertyOrDefault("mod.environment", "both").uppercase())
     val multiplatform = project.propertyOrDefault("mod.multiplatform", "true").toBoolean()
     val library = project.propertyOrDefault("mod.library", "false").toBoolean()
     val discord = project.propertyOrBlank("mod.discord")
@@ -158,7 +162,7 @@ subprojects ModProject@ {
             val commonMainSourceSet =
                 this@ModProject.project("Common").extensions.getByType(JavaPluginExtension::class).sourceSets["main"]
             val loaderName = this@SubProject.name
-            val loaderId = loaderName.toLowerCase()
+            val loaderId = loaderName.lowercase()
 
             val modrinthId = this@ModProject.findProperty("modrinth.id.${loaderId}")?.toString()
                 ?: this@ModProject.propertyOrBlank("modrinth.id")
@@ -230,7 +234,7 @@ subprojects ModProject@ {
             group = modGroup
 
             configure<BasePluginExtension> {
-                archivesName.set("${modId}-${name.toLowerCase()}")
+                archivesName.set("${modId}-${name.lowercase()}")
             }
 
             configure<org.cadixdev.gradle.licenser.LicenseExtension> {
@@ -365,6 +369,7 @@ subprojects ModProject@ {
 
                 "Fabric" -> {
                     apply(plugin = "fabric-loom")
+                    apply(plugin = "io.github.juuxel.loom-quiltflower")
                     apply(plugin = "idea")
 
                     val fabricModules = project.property("fabric.api.modules").toString().split(",".toRegex())
@@ -375,8 +380,6 @@ subprojects ModProject@ {
                         if (project.file("src/main/resources/${modId}.accesswidener").exists()) {
                             accessWidenerPath.set(project.file("src/main/resources/${modId}.accesswidener"))
                         }
-
-                        shareCaches()
 
 //                        mods {
 //                            register(modId) {

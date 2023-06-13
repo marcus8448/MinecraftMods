@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "entrypoints": {
+    "main": [
+      "io.github.marcus8448.snowy.SnowyFabric"
+    ],
+    "modmenu": [
+      "io.github.marcus8448.snowy.compat.ModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    "snowy.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14",
+    "minecraft": ">=${mc_major_minor}",
+    "java": ">=${java_version}"
+  }
+}
