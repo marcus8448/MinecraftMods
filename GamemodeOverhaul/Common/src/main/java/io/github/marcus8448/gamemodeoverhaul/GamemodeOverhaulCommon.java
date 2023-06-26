@@ -129,7 +129,7 @@ public class GamemodeOverhaulCommon {
         } else {
             level.setWeatherParameters(0, 6000, true, false);
         }
-        source.sendSuccess(() -> Component.translatable("commands.toggle_downfall"), false);
+        source.sendSuccess(Component.translatable("commands.toggle_downfall"), false);
         return 1;
     }
 
