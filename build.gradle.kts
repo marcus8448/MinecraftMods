@@ -53,12 +53,6 @@ buildscript {
                 includeGroup("net.fabricmc.fabric-api")
             }
         }
-        maven("https://server.bbkr.space/artifactory/libs-release/") {
-            name = "Quiltflower"
-            content {
-                includeGroup("io.github.juuxel")
-            }
-        }
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "Sponge Snapshots"
             content {
@@ -79,16 +73,17 @@ buildscript {
                 includeGroup("gradle.plugin.org.cadixdev.gradle")
                 includeGroup("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext")
                 includeGroup("net.darkhax.curseforgegradle")
+                includeGroup("io.github.juuxel")
             }
         }
     }
 
     dependencies {
-        classpath("com.modrinth.minotaur:Minotaur:2.8.0")
+        classpath("com.modrinth.minotaur:Minotaur:2.8.4")
         classpath("gradle.plugin.org.cadixdev.gradle:licenser:0.6.1")
-        classpath("io.github.juuxel:loom-quiltflower:1.10.0")
+        classpath("io.github.juuxel:loom-vineflower:1.11.0")
         classpath("net.darkhax.curseforgegradle:CurseForgeGradle:1.1.15")
-        classpath("net.fabricmc:fabric-loom:1.2-SNAPSHOT")
+        classpath("net.fabricmc:fabric-loom:1.3-SNAPSHOT")
         classpath("net.minecraftforge.gradle:ForgeGradle:6.0.+") { isChanging = true }
         classpath("org.spongepowered.gradle.vanilla:org.spongepowered.gradle.vanilla.gradle.plugin:0.2.1-SNAPSHOT")
     }
@@ -369,7 +364,7 @@ subprojects ModProject@ {
 
                 "Fabric" -> {
                     apply(plugin = "fabric-loom")
-                    apply(plugin = "io.github.juuxel.loom-quiltflower")
+                    apply(plugin = "io.github.juuxel.loom-vineflower")
                     apply(plugin = "idea")
 
                     val fabricModules = project.property("fabric.api.modules").toString().split(",".toRegex())
