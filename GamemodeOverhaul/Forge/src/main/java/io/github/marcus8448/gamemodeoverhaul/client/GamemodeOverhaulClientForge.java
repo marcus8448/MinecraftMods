@@ -1,6 +1,6 @@
 /*
  * GamemodeOverhaul
- * Copyright (C) 2019-2023 marcus8448
+ * Copyright (C) 2019-2024 marcus8448
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -31,7 +31,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 

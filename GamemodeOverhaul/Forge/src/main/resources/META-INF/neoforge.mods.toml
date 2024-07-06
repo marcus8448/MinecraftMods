@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[${forge_major},)"
+loaderVersion="[${fml_major},)"
 license="LGPL-3.0-only"
 
 [[mods]]
@@ -14,7 +14,7 @@ ${mod_description}
 '''
 
 [[dependencies.${mod_id}]]
-    modId="forge"
+    modId="neoforge"
     mandatory=true
     versionRange="[${forge_major},)"
     ordering="NONE"

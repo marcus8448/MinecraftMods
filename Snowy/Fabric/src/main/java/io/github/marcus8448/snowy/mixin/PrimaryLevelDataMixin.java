@@ -33,12 +33,12 @@ public abstract class PrimaryLevelDataMixin {
 
     @Inject(method = "getRainTime", at = @At("HEAD"), cancellable = true)
     private void alwaysRain(CallbackInfoReturnable<Integer> cir) {
-        if (SnowyFabric.CONFIG.enableConstantSnow()) cir.setReturnValue(6000);
+        if (SnowyFabric.CONFIG.enableConstantSnow()) cir.setReturnValue(1000);
     }
 
     @Inject(method = "getThunderTime", at = @At("HEAD"), cancellable = true)
     private void alwaysThunder(CallbackInfoReturnable<Integer> cir) {
-        if (SnowyFabric.CONFIG.enableConstantSnow()) cir.setReturnValue(6000);
+        if (SnowyFabric.CONFIG.enableConstantSnow()) cir.setReturnValue(1000);
     }
 
     @Inject(method = "isRaining", at = @At("HEAD"), cancellable = true)

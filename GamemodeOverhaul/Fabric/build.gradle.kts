@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     "modImplementation"("com.terraformersmc:modmenu:${project.property("modmenu")}") { isTransitive = false }
-    "modImplementation"("me.shedaniel.cloth:cloth-config-fabric:${project.property("cloth_config")}") {
+    "modImplementation"("me.shedaniel.cloth:cloth-config-fabric:${project.property("cloth.config")}") {
         exclude(group = "net.fabricmc")
         exclude(group = "net.fabricmc.fabric-api")
     }

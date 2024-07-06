@@ -1,6 +1,6 @@
 /*
  * GamemodeOverhaul
- * Copyright (C) 2019-2023 marcus8448
+ * Copyright (C) 2019-2024 marcus8448
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -17,10 +17,10 @@
 
 package io.github.marcus8448.gamemodeoverhaul;
 
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.config.IConfigSpec;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.config.IConfigSpec;
+import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
@@ -35,7 +35,7 @@ public class ForgeConfig implements GamemodeOverhaulConfig {
     }
 
     public ForgeConfig() {
-        Pair<Common, ForgeConfigSpec> configure = new ForgeConfigSpec.Builder().configure(Common::new);
+        Pair<Common, ModConfigSpec> configure = new ModConfigSpec.Builder().configure(Common::new);
         this.common = configure.getLeft();
         this.commonSpec = configure.getRight();
     }
@@ -116,15 +116,15 @@ public class ForgeConfig implements GamemodeOverhaulConfig {
     }
 
     public static class Common {
-        final ForgeConfigSpec.BooleanValue enableGamemode;
-        final ForgeConfigSpec.BooleanValue enableGm;
-        final ForgeConfigSpec.BooleanValue enableNoArgsGm;
-        final ForgeConfigSpec.BooleanValue enableDefaultGamemode;
-        final ForgeConfigSpec.BooleanValue enableDgm;
-        final ForgeConfigSpec.BooleanValue enableDifficulty;
-        final ForgeConfigSpec.BooleanValue enableToggledownfall;
+        final ModConfigSpec.BooleanValue enableGamemode;
+        final ModConfigSpec.BooleanValue enableGm;
+        final ModConfigSpec.BooleanValue enableNoArgsGm;
+        final ModConfigSpec.BooleanValue enableDefaultGamemode;
+        final ModConfigSpec.BooleanValue enableDgm;
+        final ModConfigSpec.BooleanValue enableDifficulty;
+        final ModConfigSpec.BooleanValue enableToggledownfall;
 
-        Common(@Nonnull ForgeConfigSpec.Builder builder) {
+        Common(@Nonnull ModConfigSpec.Builder builder) {
             builder.comment("GamemodeOverhaul's command config settings").push("commands");
             this.enableGamemode = builder.comment("Set this to false if you don't want the mod to add additional arguments to the '/gamemode' command").translation("option.gamemodeoverhaul.enable_gamemode").worldRestart().define("enableGamemode", true);
             this.enableGm = builder.comment("Set this to false if you don't want the mod to add the '/gm' command").translation("option.gamemodeoverhaul.enable_gm").worldRestart().define("enableGm", true);

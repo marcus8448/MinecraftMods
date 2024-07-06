@@ -1,6 +1,6 @@
 /*
  * GamemodeOverhaul
- * Copyright (C) 2019-2023 marcus8448
+ * Copyright (C) 2019-2024 marcus8448
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,14 +18,14 @@
 package io.github.marcus8448.gamemodeoverhaul;
 
 import io.github.marcus8448.gamemodeoverhaul.client.GamemodeOverhaulClientForge;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.fml.IExtensionPoint;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 import javax.annotation.Nonnull;
 
@@ -33,19 +33,13 @@ import javax.annotation.Nonnull;
 public class GamemodeOverhaulForge {
     public static final ForgeConfig CONFIG = new ForgeConfig();
 
-    public GamemodeOverhaulForge() {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CONFIG.commonSpec);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(CONFIG::onLoad);
-        MinecraftForge.EVENT_BUS.addListener(this::registerCommands);
-
-        //ignore version check as we only need to be on the logical server.
-        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class,
-                () -> new IExtensionPoint.DisplayTest(
-                        () -> IExtensionPoint.DisplayTest.IGNORESERVERONLY,
-                        (remoteVersion, isFromServer) -> true));
+    public GamemodeOverhaulForge(IEventBus modEventBus, Dist dist, ModContainer container) {
+        container.registerConfig(ModConfig.Type.COMMON, CONFIG.commonSpec);
+        container.getEventBus().addListener(CONFIG::onLoad);
+        NeoForge.EVENT_BUS.addListener(this::registerCommands);
 
         if (FMLEnvironment.dist.isClient()) {
-            MinecraftForge.EVENT_BUS.addListener(GamemodeOverhaulClientForge::registerClientCommands);
+            NeoForge.EVENT_BUS.addListener(GamemodeOverhaulClientForge::registerClientCommands);
         }
     }
     
